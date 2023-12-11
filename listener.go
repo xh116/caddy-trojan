@@ -208,9 +208,13 @@ func (l *Listener) loop() {
 			reader := textproto.NewReader(r)
 			line, err := reader.ReadLine()
 			if err != nil {
-				lg.Error(fmt.Sprintf("textproto ReadLine error: %v", err))
-				c.Close()
-				return
+			    if err == io.EOF {
+			        // Connection closed, no need to log an error
+			        return
+			    }
+			    lg.Error(fmt.Sprintf("textproto ReadLine error: %v", err))
+			    c.Close()
+			    return
 			}
 
 			if !validateUser(strings.TrimSpace(line)) {
